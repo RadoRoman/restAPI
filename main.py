@@ -34,15 +34,16 @@ async def get_users():
 
 @app.post('/api/create_user')
 async def register_user(user: User):
-    user.password = pbkdf2_sha256.hash(user.password)
+    user.password = pwd_context.hash(user.password)
     db.append(user)
     # if user.user_name in db:
     #     pass
 
     return {"message": f" new user {user.user_name} created"}
 
-# @app.get('/api/{user_name}/{password}')
-# async def token_for_user(user_name: User, password: User):
+
+@app.get('/api/login')
+async def login(User.user_name: str, User.password: str):
 #     dehashed_pw = pbkdf2_sha256.verify(password, User.password)
 #     if user_name and dehashed_pw in db:
 #         return{"message":"Password found"}
