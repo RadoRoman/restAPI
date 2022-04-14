@@ -4,7 +4,11 @@ from typing import List
 
 app = FastAPI()
 
-db: List[User] = []
+db: List[User] = [User(
+    user_name="first_user",
+    password="password",
+    role = Role.admin
+)]
 
 
 
@@ -20,4 +24,4 @@ async def get_users():
 @app.post('/api/post_user')
 async def register_user(user: User):
     db.append(user)
-    return {"username": user.username}
+    return {"username": user.user_name}

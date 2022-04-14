@@ -11,4 +11,4 @@ class Role(str, Enum):
 class User(BaseModel):
     user_name: str
     password: str
-    roles: List[Role]
+    role: Role
