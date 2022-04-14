@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from enum import Enum
 from typing import List
 
+
 class Role(str, Enum):
     admin = "admin"
     secretary = "secretary"
