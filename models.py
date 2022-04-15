@@ -12,4 +12,4 @@ class Role(str, Enum):
 class User(BaseModel):
     username: str
     password: str
-    # role: Role
+    role: Role
