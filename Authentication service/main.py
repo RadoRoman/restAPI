@@ -8,6 +8,10 @@ app = FastAPI()
 auth_handler = AuthHandler()
 users = []
 
+@app.get('/')
+def home():
+    return {"hello"}
+
 @app.post('/register', status_code=201)
 def register(auth_details: User):
     if any(x['username'] == auth_details.username for x in users):
