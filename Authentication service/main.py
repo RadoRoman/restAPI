@@ -8,9 +8,6 @@ app = FastAPI()
 auth_handler = AuthHandler()
 users = []
 
-@app.get('/')
-def home():
-    return {"hello"}
 
 @app.post('/register', status_code=201)
 def register(auth_details: User):
@@ -44,7 +41,7 @@ def valid_token():
     pass
 
 
-@app.get('/unprotected')
+@app.get('/')
 def unprotected():
     return { 'hello': 'world' }
 
