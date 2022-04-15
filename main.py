@@ -1,51 +1,46 @@
-import time
-from fastapi import FastAPI, Request
-from models import User, Role
-from typing import List
-from passlib.hash import pbkdf2_sha256
-from passlib.context import CryptContext
+from fastapi import FastAPI, Depends, HTTPException
+from auth import AuthHandler
+# from .schemas import AuthDetails
+from models import User
+
 
 app = FastAPI()
 
 
-db: List[User] = [User(
-    user_name="first_user",
-    password=pbkdf2_sha256.hash("password"),
-    role = Role.admin
-)]
+auth_handler = AuthHandler()
+users = []
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def verify_password(plain_pwd, hashed_pwd):
-    return pwd_context.verify(plain_pwd, hashed_pwd)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-
-@app.get('/')
-def root():
-    return {"Hi": "World, Im here"}
-
-@app.get('/api/users')
-async def get_users():
-    return db
+@app.post('/register', status_code=201)
+def register(auth_details: User):
+    if any(x['username'] == auth_details.username for x in users):
+        raise HTTPException(status_code=400, detail='Username is taken')
+    hashed_password = auth_handler.get_password_hash(auth_details.password)
+    users.append({
+        'username': auth_details.username,
+        'password': hashed_password    
+    })
+    return
 
 
-@app.post('/api/create_user')
-async def register_user(user: User):
-    user.password = pwd_context.hash(user.password)
-    db.append(user)
-    # if user.user_name in db:
-    #     pass
-
-    return {"message": f" new user {user.user_name} created"}
-
-
-@app.get('/api/login')
-async def login(User.user_name: str, User.password: str):
-#     dehashed_pw = pbkdf2_sha256.verify(password, User.password)
-#     if user_name and dehashed_pw in db:
-#         return{"message":"Password found"}
+@app.post('/login')
+def login(auth_details: User):
+    user = None
+    for x in users:
+        if x['username'] == auth_details.username:
+            user = x
+            break
     
-#     return{"message":"Password not found"}
+    if (user is None) or (not auth_handler.verify_password(auth_details.password, user['password'])):
+        raise HTTPException(status_code=401, detail='Invalid username and/or password')
+    token = auth_handler.encode_token(user['username'])
+    return { 'token': token }
+
+
+@app.get('/unprotected')
+def unprotected():
+    return { 'hello': 'world' }
+
+
+@app.get('/protected')
+def protected(username=Depends(auth_handler.auth_wrapper)):
+    return { 'name': username }

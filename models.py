@@ -10,6 +10,6 @@ class Role(str, Enum):
 
 
 class User(BaseModel):
-    user_name: str
+    username: str
     password: str
-    role: Role
+    # role: Role
